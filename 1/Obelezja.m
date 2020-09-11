@@ -98,4 +98,4 @@ P(3,1) = (cnt3/x);
 %obelezje 4: racuna gustinu piksela u pravougaoniku u donjem desnom uglu
 %P(4,1) = mean(X(round(3/4*x):end,round(3/4*y):end),'All'); 
 %P(4,1) = mean(mean(X(1:round(1/2*y),:))) - mean(mean(X(round(1/2*y):end)));
-P(4,1) = mean(X(round(3/4*x):end,round(1/3*y):round(2/3*y)), 'All');
+P(4,1) = mean(X(round(4/5*x):end,round(1/3*y):round(2/3*y)), 'All');
