@@ -16,31 +16,31 @@ M22 = [0; -5];
 S21 = [2, 1.1; 1.1, 4];
 S22 = [5, 1; 1, 1];
 
-X1 = zeros(2,N);
-X2 = zeros(2,N);
+X1 = zeros(N,2);
+X2 = zeros(N,2);
 
 for i=1:N
     t = rand(1,2);
     switch(t(1) < P11)
         case true
-            X1(:,i) = mvnrnd(M11,S11);
+            X1(i,:) = mvnrnd(M11,S11);
         case false
-            X1(:,i) = mvnrnd(M12,S12);
+            X1(i,:) = mvnrnd(M12,S12);
     end
     switch(t(2) < P22)
         case true
-            X2(:,i) = mvnrnd(M21,S21);
+            X2(i,:) = mvnrnd(M21,S21);
         case false
-            X2(:,i) = mvnrnd(M22,S22);
+            X2(i,:) = mvnrnd(M22,S22);
     end
 end
 
 figure(1)
-plot(X1(1,:),X1(2,:), 'r.'); hold on;
-plot(X2(1,:),X2(2,:), 'b.');
+plot(X1(:,1),X1(:,2), 'r.'); hold on;
+plot(X2(:,1),X2(:,2), 'b.');
 
-x = linspace(min([X1(1,:),X2(1,:)]),max([X1(1,:),X2(1,:)]),200);
-y = linspace(min([X1(2,:),X2(2,:)]),max([X1(2,:),X2(2,:)]),200);
+x = linspace(min([X1(:,1);X2(:,1)]),max([X1(:,1);X2(:,1)]),200);
+y = linspace(min([X1(:,2);X2(:,2)]),max([X1(:,2);X2(:,2)]),200);
 
 f1 = zeros(length(x),length(y));
 f2 = f1;
@@ -49,10 +49,14 @@ h = f1;
 %% III iterativna metoda
 NO = round(0.7*N);
 NT = N - NO;
-M1 = mean(X1(1:NO));
-M2 = mean(X2(1:NO));
-S1 = var(X1(1:NO));
-S2 = var(X2(1:NO));
+M1 = mean(X1(1:NO,:));
+M2 = mean(X2(1:NO,:));
+S1 = cov(X1(1:NO,:));
+S2 = cov(X2(1:NO,:));
 for s = 0:0.001:1
     V = (s*S1+(1-s)*S2)^(-1)/(M2-M1);
+    y1 = V'*X1(1:NO,:)';
+    y2 = V'*X2(1:NO,:)';
+    for v0 = linspace(-max([y1; y2],[], 'all'), -min([y1; y2],[], 'all'), 1000)
+    end
 end
