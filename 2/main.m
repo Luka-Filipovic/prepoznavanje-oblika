@@ -147,18 +147,34 @@ disp('Teorijske greske:');
 disp([Eps1_kmc,Eps2_kmc]);
 
 %% Wald
+
+P11 = 0.6;
+M11 = [1; 1];
+M12 = [6; 4];
+S11 = [4, 1.1; 1.1, 2];
+S12 = [3, -0.8; -0.8, 1.5];
+
+P22 = 0.55;
+M21 = [1.5; 0.5];
+M22 = [7; 3];
+S21 = [2, 1.1; 1.1, 4];
+S22 = [3, 0.8; 0.8, 0.5];
+
+
 eps1 = 10^-4;
 eps2 = 10^-4;
 A = (1-eps1)/eps2; B = eps1/(1-eps2);
 a = -log(A);
 b = -log(B);
-for i = 1:100
+max_itt = 0;
+N_itt = 100;
+for i = 1:N_itt
     s = [0];
     wald = false;
     itt = 0;
-    while(wald == false)
-        t = rand(1,2);
-        switch(t(1) < P11)
+    while(~wald)
+        t = rand(1,1);
+        switch(t < P11)
             case true
                X = mvnrnd(M11,S11)';
             case false
@@ -175,12 +191,47 @@ for i = 1:100
         h = log(f2)-log(f1);
 
         itt = itt + 1;
-        s = [s, s(end) - h];
+        s = [s, s(end) + h];
         if (s(end) < a || s(end) > b)
             wald = true;
             figure(4)
             hold on;
-            plot(s);
+            plot(s, 'r');
         end
     end
+    max_itt = max([max_itt, itt]);
+    s = [0];
+    wald = false;
+    itt = 0;
+    while(~wald)
+        t = rand(1,1);
+        switch(t < P22)
+            case true
+                X = mvnrnd(M21,S21)';
+            case false
+                X = mvnrnd(M22,S22)';
+        end
+        f11 = 1/(2*pi*det(S11)^0.5)*exp(-0.5*(X-M11)'*S11^(-1)*(X-M11));
+        f12 = 1/(2*pi*det(S12)^0.5)*exp(-0.5*(X-M12)'*S12^(-1)*(X-M12));
+        f1 = P11*f11 + (1-P11)*f12;
+
+        f21 = 1/(2*pi*det(S21)^0.5)*exp(-0.5*(X-M21)'*S21^(-1)*(X-M21));
+        f22 = 1/(2*pi*det(S22)^0.5)*exp(-0.5*(X-M22)'*S22^(-1)*(X-M22));
+        f2 = P22*f21 + (1-P22)*f22;
+        
+        h = log(f2)-log(f1);
+
+        itt = itt + 1;
+        s = [s, s(end) + h];
+        if (s(end) < a || s(end) > b)
+            wald = true;
+            figure(4)
+            hold on;
+            plot(s, 'b');
+        end
+    end
+    max_itt = max([max_itt, itt]);
 end
+
+plot([0 max_itt],[1 1].*a,'k--')
+plot([0 max_itt],[1 1].*b,'k--')
