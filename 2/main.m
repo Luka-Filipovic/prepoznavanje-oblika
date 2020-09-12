@@ -3,13 +3,13 @@ clear variables; close all; clc;
 %% generisanje podataka
 N = 500; % br odbiraka
 
-P1 = 0.6;
+P11 = 0.6;
 M11 = [1; 1];
 M12 = [6; 4];
 S11 = [4, 1.1; 1.1, 2];
 S12 = [3, -0.8; -0.8, 1.5];
 
-P2 = 0.55;
+P22 = 0.55;
 M21 = [7; -4];
 M22 = [6; 0];
 S21 = [2, 1.1; 1.1, 4];
@@ -20,13 +20,13 @@ X2 = zeros(2,N);
 
 for i=1:N
     t = rand(1,2);
-    switch(t(1) < P1)
+    switch(t(1) < P11)
         case true
             X1(:,i) = mvnrnd(M11,S11);
         case false
             X1(:,i) = mvnrnd(M12,S12);
     end
-    switch(t(2) < P2)
+    switch(t(2) < P22)
         case true
             X2(:,i) = mvnrnd(M21,S21);
         case false
@@ -50,10 +50,10 @@ for i = 1:length(x)
         X = [x(i);y(j)];
         f11 = 1/(2*pi*det(S11)^0.5)*exp(-0.5*(X-M11)'*S11^(-1)*(X-M11));
         f12 = 1/(2*pi*det(S12)^0.5)*exp(-0.5*(X-M12)'*S12^(-1)*(X-M12));
-        f1(i,j) = P1*f11 + (1-P1)*f12;
+        f1(i,j) = P11*f11 + (1-P11)*f12;
         f21 = 1/(2*pi*det(S21)^0.5)*exp(-0.5*(X-M21)'*S21^(-1)*(X-M21));
         f22 = 1/(2*pi*det(S22)^0.5)*exp(-0.5*(X-M22)'*S22^(-1)*(X-M22));
-        f2(i,j) = P2*f21 + (1-P2)*f22;
+        f2(i,j) = P22*f21 + (1-P22)*f22;
         h(i,j) = log(f2(i,j))-log(f1(i,j));
     end
 end
@@ -72,9 +72,77 @@ hold off;
 figure(2)
 plot(X1(1,:),X1(2,:), 'r.'); hold on;
 plot(X2(1,:),X2(2,:), 'b.');
-contour(x,y,h',[0 0]);
+contour(x,y,h',[0 0],'DisplayName','Klasifikator minimalne greske');
+x_step = x(2)-x(1);
+y_step = y(2)-y(1);
+Eps1 =sum(f1(h>=0),'All')*x_step*y_step;
+Eps2 =sum(f2(h<0),'All')*x_step*y_step;
+
+Mx = zeros(2,2);
+for i=1:N
+    [~,ix] = min(abs(x-X1(1,i)));
+    [~,iy] = min(abs(y-X1(2,i)));
+    if (h(ix,iy) <= 0)
+        Mx(1,1) = Mx(1,1) + 1;
+    else
+        Mx(1,2) = Mx(1,2) + 1;
+    end
+    [~,ix] = min(abs(x-X2(1,i)));
+    [~,iy] = min(abs(y-X2(2,i)));
+    if (h(ix,iy) >= 0)
+        Mx(2,2) = Mx(2,2) + 1;
+    else
+        Mx(2,1) = Mx(2,1) + 1;
+    end
+end
+T = array2table(Mx,'VariableNames',{'ω1_p','ω2_p'},'RowName',...
+    {'ω1_t  |','ω2_t  |'}); 
+disp('Matrica konfuzije:');
+disp(T);
+
+disp('Dobijene greske:');
+disp([Mx(1,2)/N, Mx(2,1)/N]);
+disp('Teorijske greske:');
+disp([Eps1,Eps2]);
+%% Klasifikator minimalne cene
+c11 = 0; c22 = 0;
+c12 = 1; c21 = 10*c12;
+
+th = log((c21-c11)/(c12-c22));
+
+contour(x,y,h',[th th],'g','DisplayName','Klasifikator minimalne cene');
 hold off;
 x_step = x(2)-x(1);
 y_step = y(2)-y(1);
-Eps1 =sum(sum(f1(h>=0)))*x_step*y_step;
-Eps2 =sum(sum(f2(h<0)))*x_step*y_step;
+Eps1_kmc =sum(f1(h>=th),'All')*x_step*y_step;
+Eps2_kmc =sum(f2(h<th),'All')*x_step*y_step;
+legend;
+
+Mx = zeros(2,2);
+for i=1:N
+    [~,ix] = min(abs(x-X1(1,i)));
+    [~,iy] = min(abs(y-X1(2,i)));
+    if (h(ix,iy) <= th)
+        Mx(1,1) = Mx(1,1) + 1;
+    else
+        Mx(1,2) = Mx(1,2) + 1;
+    end
+    [~,ix] = min(abs(x-X2(1,i)));
+    [~,iy] = min(abs(y-X2(2,i)));
+    if (h(ix,iy) >= th)
+        Mx(2,2) = Mx(2,2) + 1;
+    else
+        Mx(2,1) = Mx(2,1) + 1;
+    end
+end
+T = array2table(Mx,'VariableNames',{'ω1_p','ω2_p'},'RowName',...
+    {'ω1_t  |','ω2_t  |'}); 
+disp('Matrica konfuzije KMC:');
+disp(T);
+
+disp('Dobijene greske:');
+disp([Mx(1,2)/N, Mx(2,1)/N]);
+disp('Teorijske greske:');
+disp([Eps1_kmc,Eps2_kmc]);
+
+%% Wald
