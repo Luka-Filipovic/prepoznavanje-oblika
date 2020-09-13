@@ -166,12 +166,11 @@ eps2 = 10^-4;
 A = (1-eps1)/eps2; B = eps1/(1-eps2);
 a = -log(A);
 b = -log(B);
-max_itt = 0;
 N_itt = 100;
+itt = zeros(2,N_itt);
 for i = 1:N_itt
     s = [0];
     wald = false;
-    itt = 0;
     while(~wald)
         t = rand(1,1);
         switch(t < P11)
@@ -190,7 +189,7 @@ for i = 1:N_itt
         
         h = log(f2)-log(f1);
 
-        itt = itt + 1;
+        itt(1,i) = itt(1,i) + 1;
         s = [s, s(end) + h];
         if (s(end) < a || s(end) > b)
             wald = true;
@@ -199,10 +198,8 @@ for i = 1:N_itt
             plot(s, 'r');
         end
     end
-    max_itt = max([max_itt, itt]);
     s = [0];
     wald = false;
-    itt = 0;
     while(~wald)
         t = rand(1,1);
         switch(t < P22)
@@ -221,7 +218,7 @@ for i = 1:N_itt
         
         h = log(f2)-log(f1);
 
-        itt = itt + 1;
+        itt(2,i) = itt(2,i) + 1;
         s = [s, s(end) + h];
         if (s(end) < a || s(end) > b)
             wald = true;
@@ -230,8 +227,7 @@ for i = 1:N_itt
             plot(s, 'b');
         end
     end
-    max_itt = max([max_itt, itt]);
 end
 
-plot([0 max_itt],[1 1].*a,'k--')
-plot([0 max_itt],[1 1].*b,'k--')
+plot([0 max(itt,[],'All')+1],[1 1].*a,'k--')
+plot([0 max(itt,[],'All')+1],[1 1].*b,'k--')
