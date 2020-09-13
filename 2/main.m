@@ -1,7 +1,7 @@
-%% init
+%% Init
 clear variables; close all; clc;
 
-%% generisanje podataka
+%% Generisanje podataka
 N = 500; % br odbiraka
 
 P11 = 0.6;
@@ -15,6 +15,8 @@ M21 = [7; -4];
 M22 = [6; 0];
 S21 = [2, 1.1; 1.1, 4];
 S22 = [3, 0.8; 0.8, 0.5];
+
+
 
 X1 = zeros(2,N);
 X2 = zeros(2,N);
@@ -195,7 +197,7 @@ for i = 1:N_itt
             wald = true;
             figure(4)
             hold on;
-            plot(s, 'r');
+            plot(0:itt(1,i), s, 'r');
         end
     end
     s = [0];
@@ -224,10 +226,11 @@ for i = 1:N_itt
             wald = true;
             figure(4)
             hold on;
-            plot(s, 'b');
+            plot(0:itt(2,i), s, 'b');
         end
     end
 end
 
-plot([0 max(itt,[],'All')+1],[1 1].*a,'k--')
-plot([0 max(itt,[],'All')+1],[1 1].*b,'k--')
+plot([0 max(itt,[],'All')],[1 1].*a,'k--')
+plot([0 max(itt,[],'All')],[1 1].*b,'k--')
+xlim([0, max(itt,[],'All')]);
