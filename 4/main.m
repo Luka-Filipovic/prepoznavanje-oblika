@@ -44,8 +44,8 @@ xlim(xaxis); ylim(yaxis);
 %% C-mean algoritam klasterizacije
 
 Nitt = 100; 
-duzine = [1 2 4 5 8 10 20];
-itt_vect = zeros(1,length(duzine)+3);
+duzine = [1 2 5 10 20];
+itt_vect = zeros(1,length(duzine)+1);
 X = [X1; X2; X3; X4];
 X_1 = X; index_x = 1:length(X);
 X_2 = X; index_y = 1:length(X);
@@ -88,10 +88,10 @@ for itt = 1:Nitt
         K3 = lst(indexes(2*Nb/4+1:3*Nb/4),:);
         K3 = reshape(K3',1,numel(K3));
         K4 = lst(indexes(3*Nb/4+1:end),:);
-        K4 = reshape(K4',1,numel(K4));
+        K4 = reshape(K4',1,numel(K4));     
         
-        Mk1 = mean(X(K1,:),2);Mk2 = mean(X(K2,:),2);
-        Mk3 = mean(X(K3,:),2);Mk4 = mean(X(K4,:),2);
+        Mk1 = mean(X(K1,:),1);Mk2 = mean(X(K2,:),1);
+        Mk3 = mean(X(K3,:),1);Mk4 = mean(X(K4,:),1);
         radi = true;
         i = 0;
         while (radi && i<10000)
@@ -194,10 +194,10 @@ for itt = 1:Nitt
                 end
                 j=j+1;
             end
-            Mk1 = mean(X(K1,:),2);
-            Mk2 = mean(X(K2,:),2);
-            Mk3 = mean(X(K3,:),2);
-            Mk4 = mean(X(K4,:),2);
+            Mk1 = mean(X(K1,:),1);
+            Mk2 = mean(X(K2,:),1);
+            Mk3 = mean(X(K3,:),1);
+            Mk4 = mean(X(K4,:),1);
         end
         itt_vect(d) = itt_vect(d)+i/Nitt;
     end
